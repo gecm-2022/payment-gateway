@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/contextapi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-const LoginForm = () => {
-  const { Login, userdata } = useAuth();
+const SignUpForm = () => {
+  const { Signup, userdata } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [render, setrender] = useState(false);
 
@@ -26,7 +26,7 @@ const LoginForm = () => {
   } = useForm();
 
   const onsubmit = async (data) => {
-    await Login(data);
+    await Signup(data);
     setrender(true);
   };
   useEffect(() => {
@@ -112,4 +112,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SignUpForm;

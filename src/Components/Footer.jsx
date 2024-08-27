@@ -26,7 +26,7 @@ const Footer = () => {
             </div>
             <div
                 className="flex flex-col items-center cursor-pointer"
-                onClick={() => handleNavigation('/login')}
+                onClick={() => handleNavigation('/account')}
             >
                 <img src='/f3.png' alt='Services icon' height={40} width={40} className="object-contain" />
                 <p className="mt-2">Services</p>

@@ -16,7 +16,6 @@ const LoginPage = () => {
         </div>
         <LoginForm
   
-          redirect={"/dashboard"}
         />
       </div>
     </div>

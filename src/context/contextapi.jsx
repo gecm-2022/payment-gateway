@@ -1,44 +1,35 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
 export const MycontextProvide = ({ children }) => {
-  const data = 1;
   const url = import.meta.env.VITE_API_URL;
-
-
-
-
-  const [token, settoken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [userType, setUserType] = useState("");
-  const [user, setuser] = useState("");
- 
+  const [user, setUser] = useState("");
+  const [wallet, setWallet] = useState(null);
+  const [transactions, setTransactions] = useState([]);
 
-  const storeToken = (servertoken) => {
-    settoken(servertoken);
-    return localStorage.setItem("token", servertoken);
+  const isLogin = !!token;
+
+  const storeToken = (serverToken) => {
+    setToken(serverToken);
+    return localStorage.setItem("token", serverToken);
   };
 
-  let islogin = !!token;
   const Logout = () => {
-    settoken("");
-    setuser("");
-    setallStudent("");
+    setToken("");
+    setUser("");
     setUserType("");
-    toast.success("Logout....");
-
-    return localStorage.removeItem("token");
-  };
-  const [showSidebar, setShowSidebar] = useState(false);
-
-  const updateSidebarVisibility = (visibility) => {
-    setShowSidebar(visibility);
+    toast.success("Logged out");
+    localStorage.removeItem("token");
   };
 
   const userdata = async () => {
     try {
-      const response = await fetch(`${url}/auth/api/getuser`, {
+      const response = await fetch(`${url}/api/auth/getuser`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -47,76 +38,184 @@ export const MycontextProvide = ({ children }) => {
       });
       if (response.ok) {
         const r = await response.json();
-        setuser(r);
+        setUser(r);
+        setUserType(r.isAdmin ? "admin" : "user");
       }
-    } catch (error) {}
-  };
- 
-
-  // login ...
-  const Login = async (data) => {
-    const r = await fetch(`${url}/auth/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const res = await r.json();
-    if (r.ok) {
-      storeToken(res.authtoken);
-      setUserType("admin");
-
-      toast.success(res.message);
-    } else {
-      toast.error(res.error ? res.error : res);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
+  const Signup = async (data) => {
+    try {
+      const r = await fetch(`${url}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const res = await r.json();
+      if (r.ok) {
+        storeToken(res.authtoken);
+        setUserType(res.isAdmin ? "admin" : "user");
+        userdata();
+        toast.success(res.message);
+      } else {
+        toast.error(res.error ? res.error : res);
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error("Signup failed. Please try again.");
+    }
+  };
 
+  const Login = async (data) => {
+    try {
+      const r = await fetch(`${url}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const res = await r.json();
+      if (r.ok) {
+        storeToken(res.authtoken);
+        setUserType(res.isAdmin ? "admin" : "user");
+        userdata();
+        toast.success(res.message);
+      } else {
+        toast.error(res.error ? res.error : res);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.");
+    }
+  };
+
+  const getUserTransactions = async () => {
+    try {
+      const response = await fetch(
+        `${url}/api/transactions/getUserTransactions`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": token,
+          },
+        }
+      );
+      if (response.ok) {
+        const r = await response.json();
+        setTransactions(r.transactions || []);
+        setUserType(r.isAdmin ? "admin" : "user");
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const fetchWallet = async () => {
+    try {
+      const response = await fetch(`${url}/wallet`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": token,
+        },
+      });
+      if (response.ok) {
+        const walletData = await response.json();
+        setWallet(walletData);
+      }
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    }
+  };
+
+  const rechargeWallet = async (amount) => {
+    try {
+      const response = await axios.post(
+        `${url}/api/transaction/recharge`,
+        { amount },
+        {
+          headers: {
+            "auth-token": token,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // The payment is successful, update the wallet balance
+        fetchWallet(); // Update wallet balance after recharge
+        toast.success("Recharge successful");
+      } else {
+        toast.error(response.data.error || "Recharge failed");
+      }
+    } catch (error) {
+      console.error("Recharge error:", error);
+      toast.error("Error processing recharge");
+    }
+  };
+
+  const withdrawFromWallet = async (amount) => {
+    try {
+      const response = await axios.post(
+        `${url}/api/transaction/withdraw`,
+        { amount },
+        {
+          headers: {
+            "auth-token": token,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        fetchWallet(); // Update wallet balance after withdrawal
+        toast.success("Withdrawal successful");
+      } else {
+        toast.error(response.data.error || "Withdrawal failed");
+      }
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      toast.error("Error processing withdrawal");
+    }
+  };
 
   useEffect(() => {
-    const initializeUser = async () => {
-      if (islogin) {
-        try {
-          const response = await fetch(`${url}/auth/api/getuser`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "auth-token": token,
-            },
-          });
-          if (response.ok) {
-            const r = await response.json();
-            setuser(r);
-            setUserType(r.isadmin ? "admin" : "student");
-            setpower(r.isadmin);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      }
-    };
+    if (token) {
+      fetchWallet();
+    }
+  }, [token]);
 
-    initializeUser();
-  }, [token, islogin, url]);
-
+  // Fetch user data and wallet when user is logged in
+  useEffect(() => {
+    if (isLogin) {
+      userdata();
+      fetchWallet();
+      getUserTransactions();
+    }
+  }, [token]);
 
   return (
     <AuthContext.Provider
       value={{
-        userType,
-        setuser,
-        data,
         url,
-        storeToken,
-        islogin,
-        Logout,
+        isLogin,
+        userType,
+        userdata,
         user,
         Login,
+        Signup,
         token,
-        userdata,
-        updateSidebarVisibility,
+        storeToken,
+        Logout,
+        rechargeWallet,
+        withdrawFromWallet,
+        wallet,
+        getUserTransactions,
+        transactions,
       }}
     >
       {children}
@@ -125,6 +224,5 @@ export const MycontextProvide = ({ children }) => {
 };
 
 export const useAuth = () => {
-  const authcontextValue = useContext(AuthContext);
-  return authcontextValue;
+  return useContext(AuthContext);
 };
