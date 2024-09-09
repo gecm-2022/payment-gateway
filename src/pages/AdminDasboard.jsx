@@ -200,7 +200,7 @@ const AdminDashboard = () => {
                     <td className="py-3 px-4">
                       {selectedOption === "recharge" ? item.refId : item.upiId}
                     </td>
-                    <td className="py-3 px-4">{item.userName}</td>
+                    <td className="py-3 px-4">{item.userId?.username || "Unknown"}</td>
                     <td className="py-3 px-4">${item.amount}</td>
                     <td className="py-3 px-4">{item.status}</td>
                     <td className="py-3 px-4">
