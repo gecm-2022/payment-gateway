@@ -7,7 +7,7 @@ const Navbar = () => {
   const { isLogin, logout } = useAuth();
 
   return (
-    <nav className="bg-white  h-[15vh] shadow-md sticky top-0 z-10 w-[100vw] ">
+    <nav className="bg-white  md:h-[15vh] shadow-md sticky top-0 z-10 w-[100vw] ">
       <div className="container mx-auto flex items-center justify-between p-4">
         <img
           src="/logo.png" // Path to the image in the public directory

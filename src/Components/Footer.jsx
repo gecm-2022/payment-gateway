@@ -9,7 +9,7 @@ const Footer = () => {
     };
 
     return (
-        <div className="flex sticky w-[100vw] h-[15vh] bottom-0 flex-row justify-around bg-sky-600 text-white gap-2 py-5">
+        <div className="flex sticky w-[100vw] md:h-[15vh] bottom-0 flex-row justify-around bg-sky-600 text-white gap-2 py-5">
             <div
                 className="flex flex-col items-center cursor-pointer"
                 onClick={() => handleNavigation('/')}

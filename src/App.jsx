@@ -15,6 +15,9 @@ import SignUpPage from "./pages/SignupPage";
 import Transaction from "./pages/Transactions";
 import Recharge from "./pages/Recharge";
 import WalletWithdraw from "./pages/WalletWithdraw";
+import PaymentPage from "./Components/Payment";
+import AdminDashboard from "./pages/AdminDasboard";
+import UpiPaymentPage from "./Components/UpiPayment";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -50,9 +53,13 @@ function MainContent() {
                 <Privated element={<Account />}  />
               }
             />
+              <Route path="/adminDashboard" element={<AdminDashboard />} />
+             
               <Route path="/transaction" element={<Transaction />} />
               <Route path="/recharge" element={<Recharge />} />
               <Route path="/withdraw" element={<WalletWithdraw />} />
+              <Route path="/confirm-payment/:transactionId" element={<PaymentPage />} />
+              <Route path="/confirm-withdrawal/:transactionId" element={<UpiPaymentPage />} />
 
 
             <Route path="*" element={<Error />} />

@@ -3,9 +3,9 @@ import { useAuth } from "../context/contextapi";
 import { NavLink } from "react-router-dom";
 
 const Dashboard = () => {
-  const { user, userdata } = useAuth();
+  const { user, userdata ,wallet} = useAuth();
   const [accountNumber, setAccountNumber] = useState(null);
-  const [balance, setBalance] = useState(0); // Example state for wallet balance
+  // const [balance, setBalance] = useState); // Example state for wallet balance
   const [points, setPoints] = useState(0); // Example state for POINT-S
 
   useEffect(() => {
@@ -29,17 +29,17 @@ const Dashboard = () => {
           <p className="text-gray-600">Recharge wallet</p>
         </div>
         <div className="">
-          <p className="font-bold text-xl">{balance}</p>
+          <p className="font-bold ">{wallet}</p>
           <p className="text-gray-600">Balance wallet</p>
         </div>
         <div className="">
-          <p className="font-bold text-xl">{points}</p>
+          <p className="font-bold ">{points}</p>
           <p className="text-gray-600">POINT-S</p>
         </div>
       </div>
-      <div className="flex justify-around text-white mt-5">
+      <div className="flex justify-around text-white mt-5 ">
         <NavLink to={"/recharge"}>
-          <button className="flex items-center bg-yellow-500 px-10 py-2 rounded-3xl shadow">
+          <button className="flex items-center bg-yellow-500 px-7 py-2 mx-2 rounded-3xl shadow">
             <img
               src="/recharge.png"
               alt="Recharge"
@@ -51,7 +51,7 @@ const Dashboard = () => {
           </button>
         </NavLink>
         <NavLink to={"/withdraw"}>
-          <button className="flex items-center bg-yellow-500 px-10 py-2 rounded-3xl border-[1.5px] border-black shadow">
+          <button className="flex items-center bg-yellow-500 px-7 mx-2 py-2 rounded-3xl border-[1.5px]  shadow">
             <img
               src="/withdraw.png"
               alt="Withdraw"

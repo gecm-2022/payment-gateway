@@ -9,7 +9,9 @@ export const MycontextProvide = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [userType, setUserType] = useState("");
   const [user, setUser] = useState("");
-  const [wallet, setWallet] = useState(null);
+  const [wallet, setWallet] = useState(0);
+  const [TotalRecharge, setTotalRecharge] = useState(0);
+  const [TotalWithdrawal, setTotalWithdrawal] = useState(0);
   const [transactions, setTransactions] = useState([]);
 
   const isLogin = !!token;
@@ -38,8 +40,25 @@ export const MycontextProvide = ({ children }) => {
       });
       if (response.ok) {
         const r = await response.json();
-        setUser(r);
-        setUserType(r.isAdmin ? "admin" : "user");
+        setUser(r.user);
+        setWallet(r.user.wallet ? r.user.wallet.balance : 0);
+
+        const totalRechargeData = r.totalRechargeData;
+        if (totalRechargeData.length > 0) {
+       
+          const { totalRechargeCount } = totalRechargeData[0];
+
+          setTotalRecharge(totalRechargeCount || 0);
+        } 
+        const totalWithdrawalData = r.totalWithdrawalData;
+        if (totalWithdrawalData.length > 0) {
+       
+          const { totalWithdrawalCount } = totalWithdrawalData[0];
+
+          setTotalWithdrawal(totalWithdrawalCount || 0);
+        } 
+       
+        setUserType(r.user.isAdmin ? "admin" : "user");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -96,19 +115,16 @@ export const MycontextProvide = ({ children }) => {
 
   const getUserTransactions = async () => {
     try {
-      const response = await fetch(
-        `${url}/api/transactions/getUserTransactions`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "auth-token": token,
-          },
-        }
-      );
+      const response = await fetch(`${url}/getUserTransactions`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": token,
+        },
+      });
       if (response.ok) {
         const r = await response.json();
-        setTransactions(r.transactions || []);
+        setTransactions(r.transactions.reverse() || []);
         setUserType(r.isAdmin ? "admin" : "user");
       }
     } catch (error) {
@@ -134,10 +150,75 @@ export const MycontextProvide = ({ children }) => {
     }
   };
 
+  const createTransaction = async (userId, type, amount) => {
+    try {
+      const response = await fetch(`${url}/createTransaction`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": token,
+        },
+        body: JSON.stringify({ userId, amount, type }),
+      });
+      const r = await response.json();
+      if (response.ok) {
+        console.log(r);
+        return r.transaction._id;
+      }
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    }
+  };
+  const updateTransactionRefId = async (transactionId, refId) => {
+    try {
+      const response = await fetch(`${url}/updateTransactionRefId`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": token,
+        },
+        body: JSON.stringify({ transactionId, refId }), // Include refId in the request body
+      });
+      const data = await response.json(); // Handle response data
+
+      if (response.ok) {
+        return data; // Return the response data
+      } else {
+        throw new Error(data.message || "Failed to update transaction");
+      }
+    } catch (error) {
+      console.error("Error updating transaction ref ID:", error);
+      throw error; // Rethrow to handle in the component
+    }
+  };
+  const updateTransactionUpiId = async (transactionId, upiId) => {
+    try {
+      const response = await fetch(`${url}/updateTransactionUpiId`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": token, // Assuming you're using an authentication token
+        },
+        body: JSON.stringify({ transactionId, upiId }), // Pass both transactionId and upiId in the body
+      });
+
+      const data = await response.json(); // Handle the JSON response
+
+      if (response.ok) {
+        return data; // Return the successful response data
+      } else {
+        throw new Error(data.message || "Failed to update UPI ID"); // Handle errors
+      }
+    } catch (error) {
+      console.error("Error updating UPI ID:", error);
+      throw error; // Rethrow to handle errors in the component
+    }
+  };
+
   const rechargeWallet = async (amount) => {
     try {
       const response = await axios.post(
-        `${url}/api/transaction/recharge`,
+        `${url}/api/recharge`,
         { amount },
         {
           headers: {
@@ -162,7 +243,7 @@ export const MycontextProvide = ({ children }) => {
   const withdrawFromWallet = async (amount) => {
     try {
       const response = await axios.post(
-        `${url}/api/transaction/withdraw`,
+        `${url}/api/withdraw`,
         { amount },
         {
           headers: {
@@ -216,6 +297,11 @@ export const MycontextProvide = ({ children }) => {
         wallet,
         getUserTransactions,
         transactions,
+        createTransaction,
+        updateTransactionRefId,
+        updateTransactionUpiId,
+        TotalRecharge,
+        TotalWithdrawal,
       }}
     >
       {children}
