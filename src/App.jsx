@@ -11,7 +11,7 @@ import Error from "./pages/Error";
 import Account from "./pages/Account";
 import Privated from "./ProtectedFiles/Protected";
 import Logout from "./pages/Logout";
-import SignUpPage from "./pages/SignupPage";
+import SignUpPage from "./pages/SignUpPage";
 import Transaction from "./pages/Transactions";
 import Recharge from "./pages/Recharge";
 import WalletWithdraw from "./pages/WalletWithdraw";
